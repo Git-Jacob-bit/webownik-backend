@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prześlij folder pytań</title>
+</head>
+<body>
+    <h2>Wybierz folder z pytaniami</h2>
+    
+    <label for="userId">ID użytkownika:</label>
+    <input type="text" id="userId" placeholder="Podaj swoje ID" required>
+    
+    <label for="datasetName">Nazwa bazy pytań:</label>
+    <input type="text" id="datasetName" placeholder="Nazwa bazy pytań" required>
+    
+    <input type="file" id="folderInput" webkitdirectory directory multiple onchange="updateFileCount()">
+    <span id="fileCount">Liczba plików: 0</span>
+    
+    <button onclick="uploadFolder()">Prześlij</button>
+    
+    <h3>Twoje bazy pytań:</h3>
+    <button onclick="getUserDatasets()">Odśwież listę baz</button>
+    <ul id="datasetsList"></ul>
+    
+    <p id="status"></p>
+
+    <script>
+        function updateFileCount() {
+            const input = document.getElementById('folderInput');
+            document.getElementById('fileCount').innerText = "Liczba plików: " + input.files.length;
+        }
+
+        async function uploadFolder() {
+            const input = document.getElementById('folderInput');
+            const datasetName = document.getElementById('datasetName').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+            const files = input.files;
+
+            if (!userId) {
+                document.getElementById('status').innerText = "❌ Podaj ID użytkownika!";
+                return;
+            }
+
+            if (!datasetName) {
+                document.getElementById('status').innerText = "❌ Podaj nazwę bazy pytań!";
+                return;
+            }
+
+            if (files.length === 0) {
+                document.getElementById('status').innerText = "❌ Wybierz folder przed przesłaniem!";
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("user_id", userId);  // 🔹 Przekazujemy ID użytkownika
+            formData.append("dataset_name", datasetName);  
+            for (let file of files) {
+                formData.append("files", file);
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/upload-folder/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Błąd serwera: ${response.status}`);
+                }
+
+                const result = await response.json();
+                document.getElementById('status').innerText = `✅ ${result.message} Przetworzono: ${result.count}`;
+                
+                // Odśwież listę baz użytkownika po dodaniu nowej
+                getUserDatasets();
+            } catch (error) {
+                console.error("Błąd przesyłania plików:", error);
+                document.getElementById('status').innerText = `❌ Błąd: ${error.message}`;
+            }
+        }
+
+        async function getUserDatasets() {
+    const userId = document.getElementById('userId').value.trim();
+    if (!userId) {
+        document.getElementById('status').innerText = "❌ Podaj ID użytkownika, aby zobaczyć swoje bazy pytań!";
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://127.0.0.1:8000/datasets/?user_id=${userId}`);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                // Jeśli użytkownik nie ma żadnych baz, pokazujemy pustą listę
+                document.getElementById('datasetsList').innerHTML = "<li>Brak baz pytań</li>";
+                return;
+            }
+            throw new Error(`Błąd serwera: ${response.status}`);
+        }
+
+        const result = await response.json();
+        const listElement = document.getElementById('datasetsList');
+        listElement.innerHTML = "";
+
+        if (result.datasets.length === 0) {
+            listElement.innerHTML = "<li>Brak baz pytań</li>";
+        } else {
+            result.datasets.forEach(dataset => {
+                let listItem = document.createElement("li");
+                listItem.innerText = dataset;
+                listElement.appendChild(listItem);
+            });
+        }
+    } catch (error) {
+        console.error("Błąd pobierania baz:", error);
+        document.getElementById('status').innerText = `❌ Błąd pobierania listy baz: ${error.message}`;
+    }
+}
+
+
+        // Załaduj listę baz przy otwarciu strony
+        window.onload = getUserDatasets;
+    </script>
+</body>
+</html>
