@@ -5,11 +5,15 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 import jwt
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # Konfiguracja bazy danych
-DATABASE_URL = "sqlite:///./questions.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
