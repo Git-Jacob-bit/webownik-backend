@@ -6,6 +6,8 @@ from load_questions import router as questions_router
 from get_questions import router as get_questions_router
 from quiz import router as quiz_router
 from users import router as users_router
+from score import router as score_router
+
 
 app = FastAPI()
 
@@ -26,6 +28,7 @@ app.include_router(users_router, prefix="/users")
 app.include_router(questions_router, prefix="/questions")
 app.include_router(get_questions_router, prefix="/datasets")
 app.include_router(quiz_router, prefix="/quiz")
+app.include_router(score_router)
 
 # 🔹 Inicjalizacja bazy danych (na końcu, aby uniknąć problemów z importami)
 init_db()
