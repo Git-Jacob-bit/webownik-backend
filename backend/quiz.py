@@ -125,6 +125,13 @@ def submit_answer(
         user_score = UserScore(user_id=current_user.id, score=0)
         db.add(user_score)
 
+    if user_score.correct is None:
+        user_score.correct = 0
+    if user_score.incorrect is None:
+        user_score.incorrect = 0
+    if user_score.time_spent is None:
+        user_score.time_spent = 0
+
     if is_correct:
         user_score.score += 10
         user_score.correct += 1
