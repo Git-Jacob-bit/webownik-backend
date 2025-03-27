@@ -133,7 +133,7 @@ def submit_answer(
         user_score.incorrect += 1
 
 # Dodaj czas (np. z requestu – możesz przesłać jako query param np. ?time=7)
-    user_score.time_spent += time_taken
+    user_score.time_spent += time
 
 
     db.commit()
