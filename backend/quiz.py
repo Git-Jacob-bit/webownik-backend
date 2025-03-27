@@ -30,6 +30,12 @@ def start_quiz(dataset_name: str, db: Session = Depends(get_db), current_user: U
 def reset_quiz(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """✅ Usuwa aktywną sesję quizu użytkownika."""
     db.query(QuizSession).filter(QuizSession.user_id == current_user.id).delete()
+    user_score = db.query(UserScore).filter(UserScore.user_id == current_user.id).first()
+    if user_score:
+        user_score.score = 0
+        user_score.correct = 0
+        user_score.incorrect = 0
+        user_score.time_spent = 0
     db.commit()
     return {"message": "✅ Sesja quizu została zresetowana!"}
 
