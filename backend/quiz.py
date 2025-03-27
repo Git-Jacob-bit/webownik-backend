@@ -54,12 +54,12 @@ def get_next_question(db: Session = Depends(get_db), current_user: User = Depend
 
     question = db.query(Question).filter(Question.id == session_entry.question_id).first()
     answers = db.query(Answer).filter(Answer.question_id == question.id).all()
-
     return {
         "id": question.id,
         "question_text": question.question_text,
         "answers": [{"id": a.id, "text": a.answer_text} for a in answers],
-        "finished": False
+        "finished": False,
+        "dataset_name": question.dataset_name
     }
 
 @router.get("/quiz/status/")
