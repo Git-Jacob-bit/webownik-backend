@@ -105,9 +105,16 @@ class QuizSession(Base):
 
 class UserScore(Base):
     __tablename__ = "user_scores"
+
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     score = Column(Integer, default=0)
+    correct = Column(Integer, default=0)     # ✅ liczba poprawnych
+    incorrect = Column(Integer, default=0)   # ❌ liczba błędnych
+    time_spent = Column(Integer, default=0)  # ⏱️ czas w sekundach
+
+    user = relationship("User", back_populates="score")
+
 
     user = relationship("User", back_populates="scores")
 

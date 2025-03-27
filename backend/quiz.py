@@ -83,6 +83,7 @@ def get_quiz_status(db: Session = Depends(get_db), current_user: User = Depends(
 def submit_answer(
     question_id: int,
     answers: List[int],
+    time: int = Query(0),  # czas przesyłany z frontend jako query param
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -125,9 +126,15 @@ def submit_answer(
         db.add(user_score)
 
     if is_correct:
-        user_score.score += 10  # ✅ Poprawna odpowiedź – dodajemy punkty
+        user_score.score += 10
+        user_score.correct += 1
     else:
-        user_score.score -= 5  # ❌ Błędna odpowiedź – odejmujemy punkty
+        user_score.score -= 5
+        user_score.incorrect += 1
+
+# Dodaj czas (np. z requestu – możesz przesłać jako query param np. ?time=7)
+    user_score.time_spent += time_taken
+
 
     db.commit()
 
